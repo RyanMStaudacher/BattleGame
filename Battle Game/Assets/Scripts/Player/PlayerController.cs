@@ -13,7 +13,12 @@ public class PlayerController : MonoBehaviour
     [Tooltip("The walk speed of the player")]
     [SerializeField] private float walkSpeed = 300f;
 
+    [Tooltip("How high the player can jump")]
+    [SerializeField] private float jumpSpeed = 8f;
+
     private CharacterController playerCharacterController;
+    private float gravity = 9.8f;
+    private float currentVelocitySpeed = 0f;
 
     // Use this for initialization
     private void Start()
@@ -33,6 +38,11 @@ public class PlayerController : MonoBehaviour
     {
         PlayerLook();
         PlayerMovement();
+        if(Input.GetKeyDown(KeyCode.T))
+        {
+            currentVelocitySpeed = 0f;
+            currentVelocitySpeed = jumpSpeed;
+        }
     }
 
     /// <summary>
@@ -61,6 +71,7 @@ public class PlayerController : MonoBehaviour
     {
         Vector3 horizontalDir = transform.TransformDirection(Vector3.right);
         Vector3 verticalDir = transform.TransformDirection(Vector3.forward);
+        Vector3 jumpVelocity = new Vector3(0,0,0);
 
         //Horizontal
         if (Input.GetAxisRaw("Horizontal Movement") > 0)
@@ -81,5 +92,10 @@ public class PlayerController : MonoBehaviour
         {
             playerCharacterController.SimpleMove(-verticalDir * walkSpeed * Time.deltaTime);
         }
+
+        //Applies gravity to the player
+        currentVelocitySpeed -= gravity * Time.deltaTime;
+        verticalDir.y = currentVelocitySpeed;
+        playerCharacterController.Move(verticalDir * Time.deltaTime);
     }
 }
