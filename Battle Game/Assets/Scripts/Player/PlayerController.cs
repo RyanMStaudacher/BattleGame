@@ -7,6 +7,9 @@ public class PlayerController : MonoBehaviour
     [Tooltip("The camera of the player")]
     [SerializeField] private GameObject playerCameraObject;
 
+    [Tooltip("Tyhe animator of the player")]
+    [SerializeField] private Animator playerAnimator;
+
     [Tooltip("How fast or slow the player can look around")]
     [SerializeField] private float lookSpeed = 10f;
 
@@ -19,6 +22,7 @@ public class PlayerController : MonoBehaviour
     private CharacterController playerCharacterController;
     private float gravity = 9.8f;
     private float currentVelocitySpeed = 0f;
+    private bool isMoving = false;
 
     // Use this for initialization
     private void Start()
@@ -38,11 +42,11 @@ public class PlayerController : MonoBehaviour
     {
         PlayerLook();
         PlayerMovement();
-        if(Input.GetKeyDown(KeyCode.T))
-        {
-            currentVelocitySpeed = 0f;
-            currentVelocitySpeed = jumpSpeed;
-        }
+        //if(Input.GetKeyDown(KeyCode.T))
+        //{
+        //    currentVelocitySpeed = 0f;
+        //    currentVelocitySpeed = jumpSpeed;
+        //}
     }
 
     /// <summary>
@@ -93,9 +97,15 @@ public class PlayerController : MonoBehaviour
             playerCharacterController.SimpleMove(-verticalDir * walkSpeed * Time.deltaTime);
         }
 
+        HandleMovementAnimations();
         //Applies gravity to the player
-        currentVelocitySpeed -= gravity * Time.deltaTime;
-        verticalDir.y = currentVelocitySpeed;
-        playerCharacterController.Move(verticalDir * Time.deltaTime);
+        //currentVelocitySpeed -= gravity * Time.deltaTime;
+        //verticalDir.y = currentVelocitySpeed;
+        //playerCharacterController.Move(verticalDir * Time.deltaTime);
+    }
+
+    private void HandleMovementAnimations()
+    {
+        
     }
 }
