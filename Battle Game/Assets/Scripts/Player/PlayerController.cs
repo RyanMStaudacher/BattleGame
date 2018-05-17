@@ -10,6 +10,12 @@ public class PlayerController : MonoBehaviour
     [Tooltip("Tyhe animator of the player")]
     [SerializeField] private Animator playerAnimator;
 
+    [Tooltip("The HeadBobber script attached to the Main Camera")]
+    [SerializeField] private HeadBobber playerHeadBobberScript;
+
+    [Tooltip("The ChangePerspective script attached to the Main Camera")]
+    [SerializeField] private ChangePerspective playerChangePerspectiveScript;
+
     [Tooltip("How fast or slow the player can look around")]
     [SerializeField] private float lookSpeed = 10f;
 
@@ -17,17 +23,24 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float walkSpeed = 300f;
 
     [Tooltip("How high the player can jump")]
-    [SerializeField] private float jumpSpeed = 8f;
+    [SerializeField] private float jumpHeight = 8f;
 
-    private CharacterController playerCharacterController;
+    private Rigidbody playerRigidbody;
+    private RaycastHit groundHit;
+    private float maxVelocityChange = 10.0f;
     private float gravity = 9.8f;
     private float currentVelocitySpeed = 0f;
-    private bool isMoving = false;
+    private float inputH;
+    private float inputV;
+    private bool isCrouched = false;
+    private bool grounded = true;
+    private bool canJump = true;
 
     // Use this for initialization
     private void Start()
     {
-        playerCharacterController = GetComponent<CharacterController>();
+        playerRigidbody = GetComponent<Rigidbody>();
+        playerRigidbody.freezeRotation = true;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
@@ -42,11 +55,6 @@ public class PlayerController : MonoBehaviour
     {
         PlayerLook();
         PlayerMovement();
-        //if(Input.GetKeyDown(KeyCode.T))
-        //{
-        //    currentVelocitySpeed = 0f;
-        //    currentVelocitySpeed = jumpSpeed;
-        //}
     }
 
     /// <summary>
@@ -63,49 +71,79 @@ public class PlayerController : MonoBehaviour
         }
 
         //Vertical
-        if(Input.GetAxisRaw("Mouse Y") > 0 || Input.GetAxisRaw("Mouse Y") < 0)
+        if (Input.GetAxisRaw("Mouse Y") > 0 || Input.GetAxisRaw("Mouse Y") < 0)
         {
-            Vector3 playerVerticalRotation = new Vector3(Input.GetAxisRaw("Mouse Y") * lookSpeed * Time.deltaTime, 0f,0f);
+            Vector3 playerVerticalRotation = new Vector3(Input.GetAxisRaw("Mouse Y") * lookSpeed * Time.deltaTime, 0f, 0f);
 
             playerCameraObject.transform.Rotate(playerVerticalRotation);
         }
     }
 
+    /// <summary>
+    /// Handles the player's movement
+    /// </summary>
     private void PlayerMovement()
     {
-        Vector3 horizontalDir = transform.TransformDirection(Vector3.right);
-        Vector3 verticalDir = transform.TransformDirection(Vector3.forward);
-        Vector3 jumpVelocity = new Vector3(0,0,0);
+        //Gets input from axis
+        inputH = Input.GetAxisRaw("Horizontal Movement");
+        inputV = Input.GetAxisRaw("Vertical Movement");
 
-        //Horizontal
-        if (Input.GetAxisRaw("Horizontal Movement") > 0)
-        {
-            playerCharacterController.SimpleMove(horizontalDir * walkSpeed * Time.deltaTime);
-        }
-        else if (Input.GetAxisRaw("Horizontal Movement") < 0)
-        {
-            playerCharacterController.SimpleMove(-horizontalDir * walkSpeed * Time.deltaTime);
-        }
+        //Calculate how fast we should be moving
+        Vector3 targetVelocity = new Vector3(inputH, 0f, inputV);
+        targetVelocity = transform.TransformDirection(targetVelocity);
+        targetVelocity *= walkSpeed;
 
-        //Vertical
-        if (Input.GetAxisRaw("Vertical Movement") > 0)
-        {
-            playerCharacterController.SimpleMove(verticalDir * walkSpeed * Time.deltaTime);
-        }
-        else if (Input.GetAxisRaw("Vertical Movement") < 0)
-        {
-            playerCharacterController.SimpleMove(-verticalDir * walkSpeed * Time.deltaTime);
-        }
+        //Apply a force that attempts to reach our target velocity
+        Vector3 velocity = playerRigidbody.velocity;
+        Vector3 velocityChange = (targetVelocity - velocity);
+        velocityChange.x = Mathf.Clamp(velocityChange.x, -maxVelocityChange, maxVelocityChange);
+        velocityChange.z = Mathf.Clamp(velocityChange.z, -maxVelocityChange, maxVelocityChange);
+        velocityChange.y = 0f;
+        playerRigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
 
-        HandleMovementAnimations();
-        //Applies gravity to the player
-        //currentVelocitySpeed -= gravity * Time.deltaTime;
-        //verticalDir.y = currentVelocitySpeed;
-        //playerCharacterController.Move(verticalDir * Time.deltaTime);
+        //Jump
+        //Jump();
+
+        //Handle locomotive animations
+        playerAnimator.SetFloat("InputH", inputH);
+        playerAnimator.SetFloat("InputV", inputV);
     }
 
-    private void HandleMovementAnimations()
+    private void Jump()
     {
-        
+        if(Input.GetButtonDown("Jump"))
+        {
+            //Check if can jump
+            Vector3 down = transform.TransformDirection(Vector3.down);
+            canJump = Physics.Raycast(this.gameObject.transform.position, down, out groundHit, 1f);
+
+#if UNITY_EDITOR
+            Debug.DrawRay(this.gameObject.transform.position, down * 1f, Color.green);
+#endif
+
+            //Do the jump
+            if (canJump)
+            {
+                playerRigidbody.AddForce(Vector3.up * jumpHeight);
+                canJump = false;
+            }
+        }
+
+        //Check if grounded
+        Vector3 downDir = transform.TransformDirection(Vector3.down);
+        grounded = Physics.Raycast(this.gameObject.transform.position, downDir, out groundHit, 1f);
+
+#if UNITY_EDITOR
+        Debug.DrawRay(this.gameObject.transform.position, downDir * 1f, Color.green);
+#endif
+
+        if (grounded)
+        {
+            playerHeadBobberScript.enabled = true;
+        }
+        else if (!grounded)
+        {
+            playerHeadBobberScript.enabled = false;
+        }
     }
 }

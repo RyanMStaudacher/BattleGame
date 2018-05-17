@@ -5,6 +5,9 @@ using UnityEngine;
 
 public class ChangePerspective : MonoBehaviour
 {
+    [Tooltip("The PlayerController script attached to the player gameobject")]
+    [SerializeField] private PlayerController playerControllerScript;
+
     public static event Action<bool> SwitchedPerspectives;
 
     private HeadBobber headBobberScript;
