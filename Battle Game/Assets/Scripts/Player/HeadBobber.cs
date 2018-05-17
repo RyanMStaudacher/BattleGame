@@ -17,8 +17,8 @@ public class HeadBobber : MonoBehaviour
 	private void Update ()
     {
         float waveslice = 0.0f;
-        float horizontal = Input.GetAxisRaw("Horizontal Movement");
-        float vertical = Input.GetAxisRaw("Vertical Movement");
+        float horizontal = Input.GetAxis("Horizontal Movement");
+        float vertical = Input.GetAxis("Vertical Movement");
 
         if (Mathf.Abs(horizontal) == 0 && Mathf.Abs(vertical) == 0)
         {
