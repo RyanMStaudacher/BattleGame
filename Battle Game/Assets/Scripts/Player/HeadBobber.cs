@@ -7,14 +7,9 @@ public class HeadBobber : MonoBehaviour
     [Tooltip("The PlayerController script attached to the player gameobject")]
     [SerializeField] private PlayerController playerControllerScript;
 
-    [Tooltip("How fast the head bobs")]
-    [SerializeField] private float bobbingSpeed = 0.25f;
-
-    [Tooltip("The size of the bob")]
-    [SerializeField] private float bobbingAmount = 0.1f;
-
-    [Tooltip("The midpoint of the bob")]
-    [SerializeField] private float midpoint = 1.5f;
+    public float bobbingSpeed = 0.25f;
+    public float bobbingAmount = 0.1f;
+    public float midpoint = 1.5f;
 
     private float timer = 0f;
 	

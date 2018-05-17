@@ -12,7 +12,7 @@ public class ChangePerspective : MonoBehaviour
 
     private HeadBobber headBobberScript;
     private Camera playerCamera;
-    private bool isInFirstPerson = true;
+    private bool isInFirstPerson = false;
 
 	// Use this for initialization
 	void Start ()

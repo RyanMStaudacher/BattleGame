@@ -85,8 +85,8 @@ public class PlayerController : MonoBehaviour
     private void PlayerMovement()
     {
         //Gets input from axis
-        inputH = Input.GetAxisRaw("Horizontal Movement");
-        inputV = Input.GetAxisRaw("Vertical Movement");
+        inputH = Input.GetAxis("Horizontal Movement");
+        inputV = Input.GetAxis("Vertical Movement");
 
         //Calculate how fast we should be moving
         Vector3 targetVelocity = new Vector3(inputH, 0f, inputV);
@@ -103,6 +103,8 @@ public class PlayerController : MonoBehaviour
 
         //Jump
         //Jump();
+
+        Crouch();
 
         //Handle locomotive animations
         playerAnimator.SetFloat("InputH", inputH);
@@ -144,6 +146,34 @@ public class PlayerController : MonoBehaviour
         else if (!grounded)
         {
             playerHeadBobberScript.enabled = false;
+        }
+    }
+
+    private void Crouch()
+    {
+        if(!isCrouched && Input.GetButtonDown("Crouch"))
+        {
+            playerAnimator.SetBool("isCrouched", true);
+            isCrouched = true;
+            walkSpeed /= 2f;
+            playerHeadBobberScript.midpoint = 1f;
+            playerHeadBobberScript.bobbingSpeed = 0.2f;
+            GetComponent<CapsuleCollider>().height /= 1.5f;
+            float colliderCenterY = GetComponent<CapsuleCollider>().center.y;
+            Vector3 newCenter = new Vector3(0f, colliderCenterY / 1.5f, 0f);
+            GetComponent<CapsuleCollider>().center = newCenter;
+        }
+        else if(isCrouched && Input.GetButtonDown("Crouch"))
+        {
+            playerAnimator.SetBool("isCrouched", false);
+            isCrouched = false;
+            walkSpeed *= 2f;
+            playerHeadBobberScript.midpoint = 1.5f;
+            playerHeadBobberScript.bobbingSpeed = 0.288f;
+            GetComponent<CapsuleCollider>().height *= 1.5f;
+            float colliderCenterY = GetComponent<CapsuleCollider>().center.y;
+            Vector3 newCenter = new Vector3(0f, colliderCenterY * 1.5f, 0f);
+            GetComponent<CapsuleCollider>().center = newCenter;
         }
     }
 }
