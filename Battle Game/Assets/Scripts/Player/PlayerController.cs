@@ -28,13 +28,13 @@ public class PlayerController : MonoBehaviour
     private Rigidbody playerRigidbody;
     private RaycastHit groundHit;
     private float maxVelocityChange = 10.0f;
-    private float gravity = 9.8f;
-    private float currentVelocitySpeed = 0f;
+    //private float gravity = 9.8f;
+    //private float currentVelocitySpeed = 0f;
     private float inputH;
     private float inputV;
     private bool isCrouched = false;
     private bool grounded = true;
-    private bool canJump = true;
+    public bool canJump = true;
 
     // Use this for initialization
     private void Start()
@@ -48,7 +48,16 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
+        //Gets input from axis
+        inputH = Input.GetAxis("Horizontal Movement");
+        inputV = Input.GetAxis("Vertical Movement");
 
+        //Handle locomotive animations
+        playerAnimator.SetFloat("InputH", inputH);
+        playerAnimator.SetFloat("InputV", inputV);
+
+        //Jump();
+        Crouch();
     }
 
     private void FixedUpdate()
@@ -84,10 +93,6 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     private void PlayerMovement()
     {
-        //Gets input from axis
-        inputH = Input.GetAxis("Horizontal Movement");
-        inputV = Input.GetAxis("Vertical Movement");
-
         //Calculate how fast we should be moving
         Vector3 targetVelocity = new Vector3(inputH, 0f, inputV);
         targetVelocity = transform.TransformDirection(targetVelocity);
@@ -100,15 +105,6 @@ public class PlayerController : MonoBehaviour
         velocityChange.z = Mathf.Clamp(velocityChange.z, -maxVelocityChange, maxVelocityChange);
         velocityChange.y = 0f;
         playerRigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
-
-        //Jump
-        //Jump();
-
-        Crouch();
-
-        //Handle locomotive animations
-        playerAnimator.SetFloat("InputH", inputH);
-        playerAnimator.SetFloat("InputV", inputV);
     }
 
     private void Jump()
@@ -157,7 +153,7 @@ public class PlayerController : MonoBehaviour
             isCrouched = true;
             walkSpeed /= 2f;
             playerHeadBobberScript.midpoint = 1f;
-            playerHeadBobberScript.bobbingSpeed = 0.2f;
+            playerHeadBobberScript.bobbingSpeed = 0.045f;
             GetComponent<CapsuleCollider>().height /= 1.5f;
             float colliderCenterY = GetComponent<CapsuleCollider>().center.y;
             Vector3 newCenter = new Vector3(0f, colliderCenterY / 1.5f, 0f);
@@ -169,7 +165,7 @@ public class PlayerController : MonoBehaviour
             isCrouched = false;
             walkSpeed *= 2f;
             playerHeadBobberScript.midpoint = 1.5f;
-            playerHeadBobberScript.bobbingSpeed = 0.288f;
+            playerHeadBobberScript.bobbingSpeed = 0.06f;
             GetComponent<CapsuleCollider>().height *= 1.5f;
             float colliderCenterY = GetComponent<CapsuleCollider>().center.y;
             Vector3 newCenter = new Vector3(0f, colliderCenterY * 1.5f, 0f);
